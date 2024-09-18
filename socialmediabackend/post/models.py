@@ -22,8 +22,8 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Comment(models.Model):
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_by = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)  # User who created the comment
+    text = models.TextField(blank=True)  # The comment text
     created_at = models.DateTimeField(auto_now_add=True)
 
 class PostAttachment(models.Model):

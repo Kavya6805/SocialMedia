@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from .models import Post, Like, Trend
+from .models import Post, Like, Trend,Comment
 from .serializers import PostSerializer, TrendSerializer
 from .forms import PostForm, AttachmentForm
 from user.models import User
@@ -93,6 +93,35 @@ def post_like(request, pk):
     else:
         existing_like = post.likes.filter(created_by=request.user).first()
         return JsonResponse({'message': 'Already liked', 'user_id': existing_like.created_by.id})
+    
+@api_view(['POST'])
+def post_create_comment(request, pk):
+    post = Post.objects.get(pk=pk)
+    user = request.user
+    comment_text = request.data.get('comment', '')
+    
+    if comment_text:
+        comment = Comment.objects.create(post=post, created_by=user, text=comment_text)
+        print("comment",comment.text)
+        post.comments.add(comment)
+        print(post.comments)
+        post.comments_count=post.comments_count+1
+        post.save()
+        
+        # Optionally send notification here
+        notification = create_notification(request, 'post_comment', post_id=post.id)
+
+        return JsonResponse({
+            'id': comment.id,
+            'created_by': {
+                'id': user.id,
+                'username': user.username,
+                'avatar': user.profile_picture.url,
+            },
+            'text': comment.text
+        })
+    return JsonResponse({'error': 'Comment text required'}, status=400)
+
 
 
 @api_view(['POST'])
