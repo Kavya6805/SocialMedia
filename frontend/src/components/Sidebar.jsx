@@ -18,13 +18,13 @@ import { styled } from '@mui/material/styles';
 import { blue, red, green, yellow, grey } from '@mui/material/colors';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { unSetUserToken } from '../redux/features/authSlice';
-import { unsetOtherUserInfo, unsetUserInfo, unSetUserPosts } from '../redux/features/userSlice';
+import { unSetMyPosts, unsetOtherUserInfo, unsetUserInfo, unSetUserPosts } from '../redux/features/userSlice';
 import { removeToken } from '../redux/services/LocalStorageService';
 import { useDispatch } from 'react-redux';
 import { NavLink } from 'react-bootstrap';
 import { useSearchUsersQuery } from '../redux/services/userDetailApi';
 import CloseIcon from '@mui/icons-material/Close';
-import { unsetFollowers } from '../redux/features/followersSlice';
+import { unsetFollowers, unsetFollowing } from '../redux/features/followersSlice';
 
 
 // Define styled components
@@ -100,6 +100,27 @@ const Sidebar = ({ darkMode, setDarkMode }) => {
     dispatch(unsetOtherUserInfo({ id: "", username: "", email: "" ,name:"",date_of_birth:"",bio:""}))
     dispatch(unSetUserPosts([]))
     dispatch(unsetFollowers([]))
+    dispatch(unsetUserInfo({ id: "", username: "", email: "" }));
+    dispatch(unSetUserToken({ access_token: null }));
+    dispatch(unsetFollowing());
+    dispatch(unsetUserInfo());
+
+    // Unset user posts
+    dispatch(unSetUserPosts());
+
+    // Unset other posts
+    dispatch(unsetOtherUserInfo());
+
+    // Unset my posts
+    dispatch(unSetMyPosts());
+
+    // Unset other user info
+    dispatch(unsetOtherUserInfo());
+    dispatch(unSetUserToken());
+    // Unset following
+    dispatch(unsetFollowers());
+    removeToken();
+    localStorage.removeItem('pastSearches')
     removeToken()
     localStorage.removeItem('pastSearches')
     navigate('/signin')

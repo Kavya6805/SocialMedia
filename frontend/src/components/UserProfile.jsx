@@ -66,6 +66,9 @@ const UserProfile = ({ posts,darkMode }) => {
         }
     }, [otherUserData, otherUserSuccess, followStatus]);
 // }, []);
+useEffect(() => {
+    // This effect will run when the page loads
+}, []);
     
 
 

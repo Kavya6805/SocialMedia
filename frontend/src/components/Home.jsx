@@ -8,7 +8,7 @@ import './Home.css'
 import throttle from 'lodash/throttle';
 import StoryModal from './StoryModal';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFetchPostsQuery, useLikePostMutation } from '../redux/services/userFunctionalityApi';
+import { useAddCommentMutation, useFetchPostsQuery, useLikePostMutation } from '../redux/services/userFunctionalityApi';
 import { getToken } from '../redux/services/LocalStorageService';
 import { setOtherPosts, setUserId, setUserInfo, setUserPosts } from '../redux/features/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,16 +55,16 @@ const Home = () => {
 
 
   // trend='#coding'
-  const {access_token}=getToken()
-  const { data: userposts, error, isLoading } = useFetchPostsQuery({access_token});
+  const { access_token } = getToken()
+  const { data: userposts, error, isLoading } = useFetchPostsQuery({ access_token });
   console.log(userposts);
-  
+
   const { data: loggedUserData, error: loggedUserError, isSuccess: loggedUserSuccess } = useGetLoggedUserQuery(access_token);
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
   const [likePost] = useLikePostMutation(); // RTK Query hook
 
-  
-  
+
+
   const progressRef = useRef(null);
   const navigate = useNavigate();
   useEffect(() => {
@@ -82,11 +82,11 @@ const Home = () => {
 
       return () => clearInterval(timer);
     }
-    if(loggedUserSuccess && isFirstFetch){
+    if (loggedUserSuccess && isFirstFetch) {
       dispatch(setUserId({ postlikeuserid: loggedUserData.id }));
       setIsFirstFetch(false)
     }
-  }, [showStoryModal, selectedStory,dispatch,isFirstFetch]);
+  }, [showStoryModal, selectedStory, dispatch, isFirstFetch]);
 
   // const handleSave = (id) => {
   //   setPosts(posts.map(post =>
@@ -113,18 +113,18 @@ const Home = () => {
   //   ));
   // };
 
-  const toggleShowAllComments = (id) => {
-    setShowAllComments(prevState => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
-  };
+  // const toggleShowAllComments = (id) => {
+  //   setShowAllComments(prevState => ({
+  //     ...prevState,
+  //     [id]: !prevState[id],
+  //   }));
+  // };
 
   const handleProfileRedirect = (isPrivate, id) => {
     if (isPrivate) {
       navigate(`user/private-profile/${id}`);
     } else {
-      navigate(`user/profile/${id}`,{ state: { userPosts:userposts } });
+      navigate(`user/profile/${id}`, { state: { userPosts: userposts } });
     }
   };
 
@@ -184,7 +184,9 @@ const Home = () => {
     }
   };
   console.log(postlikeuserid);
-  
+  console.log(userposts);
+
+
   return (
     <Container fluid>
       <Row>
@@ -238,126 +240,56 @@ const Home = () => {
           </Box>
 
           {/* Posts */}
-          {!userposts? (
-        <div>No posts available.</div>
-      ) : (
-        userposts.map(post => (
-          <Card key={post.id} className="mb-4 shadow-sm">
-            <Card.Header  style={{cursor:"pointer"}} className="d-flex align-items-center bg-light" onClick={() => handleProfileRedirect(post.created_by.is_private, post.created_by.id)}>
-              <Avatar src={"http://127.0.0.1:8000"+post.created_by.profile_picture} alt={post.created_by.username} sx={{ mr: 2 }} />
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{post.created_by.username}</Typography>
-            </Card.Header>
-            {/* Conditionally render images */}
-            {post.attachments && post.attachments.length > 1 ? (
-              <Carousel
-                interval={null}
-                controls={post.attachments.length > 1}
-                indicators
-                activeIndex={currentIndex}
-                onSelect={(selectedIndex) => setCurrentIndex(selectedIndex)}
-                style={{ marginTop: '10px' }}
-              >
-                {post.attachments.map((attachment, index) => (
-                  <Carousel.Item key={index}>
-                    <img
-                      className="d-block w-100"
-                      src={attachment.get_media_url}
-                      alt={`Post Image ${index}`}
-                      style={{ height: 'auto', maxHeight: '500px', objectFit: 'fill' }}
-                    />
-                  </Carousel.Item>
-                ))}
-              </Carousel>
-            ) : post.attachments && post.attachments.length === 1 ? (
-              <img
-                className="d-block w-100"
-                src={post.attachments[0].get_media_url}
-                alt="Post Image"
-                style={{ height: 'auto', maxHeight: '500px', objectFit: 'fill' }}
-              />
-            ) : null}
-            <Card.Body>
-              <Typography variant="body1" gutterBottom>{post.body}</Typography>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <IconButton aria-label="like" onClick={() => handleLike(post.id)}>
-                    <Favorite sx={{ color: post.likes.some((like) => like.created_by.id === postlikeuserid)||likedPosts[post.id] ? 'red' : 'inherit'}} />
-                  </IconButton>
-                  <span>{likedPosts[post.id] ? post.likes_count + 1 : post.likes_count}</span>
-                </div>
-                <div>
-                  <IconButton aria-label="comment">
-                    <Comment />
-                  </IconButton>
-                  <span>{post.comments ? post.comments.length : 0}</span>
-                </div>
-                <div>
-                  <IconButton aria-label="share">
-                    <Share />
-                  </IconButton>
-                </div>
-                <div>
-                  <IconButton aria-label="save" onClick={() => {}}>
-                    <Bookmark sx={{ color: post.saved ? 'black' : 'inherit' }} />
-                  </IconButton>
-                </div>
-              </div>
-              <Box sx={{ mt: 2 }}>
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  placeholder="Add a comment..."
-                  value={post.newComment || ''}
-                  onChange={(e) =>{} }
-                  // handleCommentChange(e, post.id)
-                  InputProps={{
-                    endAdornment: (
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {emojiSuggestions.map((emoji, index) => (
-                          <IconButton
-                            key={index}
-                            onClick={() => {}}
-                          >
-                            {/* handleCommentChange({ target: { value: (post.newComment || '') + emoji } }, post.id) */}
-                            <Typography>{emoji}</Typography>
-                          </IconButton>
-                        ))}
-                        <IconButton aria-label="emoji">
-                          <EmojiEmotionsIcon />
-                        </IconButton>
-                      </Box>
-                    ),
-                  }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      // handleCommentSubmit(post.id);
-                    }
-                  }}
-                />
-              </Box>
-              <Box sx={{ mt: 2 }}>
-                {post.comments && (showAllComments[post.id] ? post.comments : post.comments.slice(-2)).map((comment, index) => (
-                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Avatar src={comment.avatar} sx={{ width: 30, height: 30, mr: 1 }} />
-                    <Typography variant="body2" gutterBottom>
-                      {comment.text}
-                    </Typography>
-                  </Box>
-                ))}
-                {post.comments && post.comments.length > 2 && (
-                  <Button
-                    variant="text"
-                    onClick={() => toggleShowAllComments(post.id)}
-                  >
-                    {showAllComments[post.id] ? 'Show Less' : 'Show All Comments'}
-                  </Button>
-                )}
-              </Box>
-            </Card.Body>
-          </Card>
-        ))
-      )}
+          {!userposts ? (
+            <div>No posts available.</div>
+          ) : (
+            userposts.map(post => (
+              <Card key={post.id} className="mb-4 shadow-sm">
+                <Card.Header style={{ cursor: "pointer" }} className="d-flex align-items-center bg-light" onClick={() => handleProfileRedirect(post.created_by.is_private, post.created_by.id)}>
+                  <Avatar src={"http://127.0.0.1:8000" + post.created_by.profile_picture} alt={post.created_by.username} sx={{ mr: 2 }} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{post.created_by.username}</Typography>
+                </Card.Header>
+                {/* Conditionally render images */}
+                {post.attachments && post.attachments.length === 1 ? (
+                  <img
+                    className="d-block w-100"
+                    src={post.attachments[0].get_media_url}
+                    alt="Post Image"
+                    style={{ height: 'auto', maxHeight: '500px', objectFit: 'fill' }}
+                  />
+                ) : null}
+                <Card.Body>
+                  <Typography variant="body1" gutterBottom>{post.body}</Typography>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <IconButton aria-label="like" onClick={() => handleLike(post.id)}>
+                        <Favorite sx={{ color: post.likes.some((like) => like.created_by.id === postlikeuserid) || likedPosts[post.id] ? 'red' : 'inherit' }} />
+                      </IconButton>
+                      <span>{likedPosts[post.id] ? post.likes_count + 1 : post.likes_count}</span>
+                    </div>
+                    <div>
+                      <IconButton aria-label="comment">
+                        <Comment />
+                      </IconButton>
+                      <span>{post.comments_count}</span>
+                    </div>
+                    <div>
+                      <IconButton aria-label="share">
+                        <Share />
+                      </IconButton>
+                    </div>
+                    <div>
+                      <IconButton aria-label="save" onClick={() => { }}>
+                        <Bookmark sx={{ color: post.saved ? 'black' : 'inherit' }} />
+                      </IconButton>
+                    </div>
+                  </div>
+                  {/* Comments Section */}
+                  <CommentsSection post={post} />
+                </Card.Body>
+              </Card>
+            ))
+          )}
         </Col>
 
         {/* Right Sidebar */}
@@ -414,3 +346,157 @@ const Home = () => {
   );
 };
 export default Home;
+
+
+
+const CommentsSection = ({ post }) => {
+  const [addComment] = useAddCommentMutation();
+  const [newComment, setNewComment] = useState('');
+  const [emojiSuggestions] = useState(['😊', '😂', '❤️']);
+  const [showAll, setShowAll] = useState(false); // State to control comment visibility
+  const access_token = localStorage.getItem("access_token");
+
+  const handleCommentSubmit = async (postId) => {
+    if (newComment.trim()) {
+      await addComment({ postId, comment: newComment, access_token });
+      setNewComment(''); // Clear input after submit
+    }
+  };
+
+  const handleCommentChange = (e) => {
+    setNewComment(e.target.value);
+  };
+
+  const handleShowAll = () => {
+    setShowAll(true);
+  };
+
+  // Show only 2 comments initially, show all if 'showAll' is true
+  const visibleComments = showAll ? post.comments : post.comments.slice(0, 2);
+
+  return (
+    <Box>
+      {/* Display existing comments */}
+      <Box sx={{ mt: 2 }}>
+        {post.comments.map((comment) => (
+          <Box key={comment.id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <Avatar src={"http://127.0.0.1:8000" + comment.created_by.profile_picture} sx={{ width: 30, height: 30, mr: 1 }} />
+            <Typography variant="body2" gutterBottom sx={{ fontWeight: 'bold', mr: 1 }}>
+              {comment.created_by.username}:
+            </Typography>
+            <Typography variant="body2" gutterBottom>{comment.text}</Typography>
+          </Box>
+        ))}
+        {!showAll && post.comments.length > 2 && (
+          <Button onClick={handleShowAll} sx={{ mt: 2 }}>
+            Show All
+          </Button>
+        )}
+      </Box>
+
+      {/* {post.comments.map((comment) => (
+        <div className="comment">
+          <img src={comment.created_by['profile_picture']} alt={comment.created_by['username']} className="comment-avatar" />
+          <div className="comment-body">
+            <strong>{comment.created_by['username']}</strong>
+            <p>{comment.body}</p>
+          </div>
+        </div>
+      ))} */}
+
+      {/* Add new comment */}
+      <Box sx={{ mt: 2 }}>
+        <TextField
+          variant="outlined"
+          fullWidth
+          placeholder="Add a comment..."
+          value={newComment}
+          onChange={handleCommentChange}
+          InputProps={{
+            endAdornment: (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {emojiSuggestions.map((emoji, index) => (
+                  <IconButton key={index} onClick={() => setNewComment(newComment + emoji)}>
+                    <Typography>{emoji}</Typography>
+                  </IconButton>
+                ))}
+                <IconButton aria-label="emoji">
+                  <EmojiEmotionsIcon />
+                </IconButton>
+              </Box>
+            ),
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleCommentSubmit(post.id);
+            }
+          }}
+        />
+      </Box>
+    </Box>
+  );
+};
+
+// export default CommentsSection;
+
+
+const PostCommentsModal = ({ post }) => {
+  const [openComment, setOpenComment] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+
+  const handleShowAll = () => {
+    setShowAll(true);
+  };
+
+  const handleOpencommentsModal = () => {
+    setOpenComment(true);
+  };
+
+  const handleClose = () => {
+    setOpenComment(false);
+    setShowAll(false); // reset showAll state when modal closes
+  };
+
+  return (
+    <>
+      {/* Button to trigger modal */}
+      <Button onClick={handleOpencommentsModal}>
+        View Comments ({post.comments.length})
+      </Button>
+
+      {/* Modal for displaying comments */}
+      <Modal open={openComment} onClose={handleClose}>
+        <Box sx={{ width: 400, bgcolor: 'background.paper', p: 3, mx: 'auto', mt: 10, borderRadius: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Comments
+          </Typography>
+
+          {/* Comment section */}
+          {post.comments.slice(0, showAll ? post.comments.length : 2).map((comment) => (
+            <Box key={comment.id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Avatar src={"http://127.0.0.1:8000" + comment.created_by.profile_picture} sx={{ width: 30, height: 30, mr: 1 }} />
+              <Typography variant="body2" gutterBottom sx={{ fontWeight: 'bold', mr: 1 }}>
+                {comment.created_by.username}:
+              </Typography>
+              <Typography variant="body2" gutterBottom>{comment.text}</Typography>
+            </Box>
+          ))}
+
+          {/* Show All button */}
+          {!showAll && post.comments.length > 2 && (
+            <Button onClick={handleShowAll} sx={{ mt: 2 }}>
+              Show All
+            </Button>
+          )}
+
+          {/* Close button */}
+          <Button onClick={handleClose} sx={{ mt: 2 }}>
+            Close
+          </Button>
+        </Box>
+      </Modal>
+    </>
+  );
+};
+

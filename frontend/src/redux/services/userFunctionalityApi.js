@@ -58,8 +58,20 @@ export const userFunctionalityApi = createApi({
           },
         }},
       }),
+      addComment: builder.mutation({
+        query: ({ postId, comment, access_token }) => {
+          return {
+            url: `post/${postId}/comment/`,
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${access_token}`,
+              'Content-type': 'application/json',
+            },
+            body: JSON.stringify({ comment }), // Payload for the comment
+          };
+        },
+      }),
     })
-    
   })
   
-export const {useCreatePostMutation,useFetchPostsQuery,useGetPostsQuery,useFetchProfilePostsQuery,useLikePostMutation }=userFunctionalityApi
+export const {useCreatePostMutation,useFetchPostsQuery,useGetPostsQuery,useFetchProfilePostsQuery,useLikePostMutation,useAddCommentMutation }=userFunctionalityApi
