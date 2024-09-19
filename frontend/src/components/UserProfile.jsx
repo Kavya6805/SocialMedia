@@ -229,11 +229,11 @@ useEffect(() => {
                                             }}
                                         >
                                             <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                                                {post.like_count} ❤️
+                                                {post.likes_count} ❤
                                             </Typography>
                                             <Typography variant="body2">
-                                                {post.comments} 💬
-                                            </Typography>
+                                                {post.comments.length} 💬
+                                            </Typography>
                                         </Box>
                                     </Card>
                                 </Grid>

@@ -128,6 +128,7 @@ const Home = () => {
     }
   };
 
+    
   const handleStoryClick = (story) => {
     setSelectedStory(story);
     setShowStoryModal(true);
@@ -371,6 +372,10 @@ const CommentsSection = ({ post }) => {
     setShowAll(true);
   };
 
+  useEffect(()=>{
+
+  },[handleCommentSubmit])
+
   // Show only 2 comments initially, show all if 'showAll' is true
   const visibleComments = showAll ? post.comments : post.comments.slice(0, 2);
 
@@ -378,7 +383,7 @@ const CommentsSection = ({ post }) => {
     <Box>
       {/* Display existing comments */}
       <Box sx={{ mt: 2 }}>
-        {post.comments.map((comment) => (
+        {visibleComments.map((comment) => (
           <Box key={comment.id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Avatar src={"http://127.0.0.1:8000" + comment.created_by.profile_picture} sx={{ width: 30, height: 30, mr: 1 }} />
             <Typography variant="body2" gutterBottom sx={{ fontWeight: 'bold', mr: 1 }}>

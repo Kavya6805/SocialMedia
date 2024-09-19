@@ -158,7 +158,6 @@ const ProfilePage = ({ darkMode }) => {
 
     // Unset other user info
     dispatch(unsetOtherUserInfo());
-    dispatch(unSetUserToken());
     // Unset following
     dispatch(unsetFollowers());
     removeToken();
